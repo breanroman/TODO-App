@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TODO Practice App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>🎯 TODO Practice App</h1>
+    <label class="filter-completed-toggle">
+    <input type="checkbox" id="toggle-completed" checked />
+    Show Completed Tasks
+    </label>
+
+    <!--DELETE AS ONLY FOR TESTING -->
+    <button id="generateTasksBtn">Force Generate Tasks</button>
+    <!--DELETE AS ONLY FOR TESTING -->
+    <p id="motivational-quote">Loading motivational quote...</p>
+  </header>
+
+  <main>
+    <!-- ✅ Daily Checklist Section -->
+    <section>
+      <h2>🗓️ Daily Checklist</h2>
+      <ul id="daily-tasks" class="task-list"></ul>
+    </section>
+
+    <!-- ✅ Weekly Checklist Section -->
+    <section>
+      <h2>📅 Weekly Checklist</h2>
+      <ul id="weekly-tasks" class="task-list"></ul>
+    </section>
+
+    <!-- ✅ Progress Tracker Section -->
+    <section>
+      <h2>📊 Weekly Progress</h2>
+      <p id="progress-tracker">Daily: 0/6 | Weekly: 0/3</p>
+    </section>
+
+    <!-- ✅ Completed Task History -->
+    <section>
+      <h2>✅ Completed History</h2>
+      <div>
+        <h3>Daily</h3>
+        <ul id="daily-history"></ul>
+      </div>
+      <div>
+        <h3>Weekly</h3>
+        <ul id="weekly-history"></ul>
+      </div>
+    </section>
+
+    <!-- 📝 Optional Manual Entry -->
+    <section>
+      <h2>➕ Add Custom Task</h2>
+      <input type="text" id="taskInput" placeholder="Enter a new task" />
+      <select id="taskType">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+      </select>
+      <button id="addTaskBtn">Add Task</button>
+      </section>
+      <!-- 💾 Backup and Restore -->
+      <section>
+      <h2>💾 Backup & Restore Tasks</h2>
+      <button id="backupBtn">Backup Tasks</button>
+      <input type="file" id="restoreInput" style="display:none;" />
+      <button id="restoreBtn">Restore Tasks</button>
+      </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

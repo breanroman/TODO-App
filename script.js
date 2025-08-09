@@ -23,14 +23,6 @@ document.getElementById("generateTasksBtn").addEventListener("click", () => {
   // === Daily Outreach Messages by Date ===
   // Format: "YYYY-MM-DD": [ "Message 1", "Message 2", ... ]
   const dailyOutreachMessages = {
-    "2025-08-06": [
-      "Danielle — Your joy makes everything shine brighter. Thinking of you this morning.",
-      "Howie — Holding you close today, my friend. Hope you’re feeling some light and ease."
-    ],
-     "2025-08-07": [
-      "Heather - A little midweek check-in — how’s your heart?",
-      "Lyn - Just thinking of you today. Hope summer’s treating you well and that you're getting some time to rest or enjoy something you love. 💛"
-    ],
     "2025-08-08": [
       "Danielle — You make the little things feel so meaningful. Love being your partner.",
       "Nick — Would love to catch up sometime soon. Hope the kids are doing great!",

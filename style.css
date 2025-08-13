@@ -1,3 +1,9 @@
+/* === Utility Class for Show/Hide === */
+/* JS will toggle this class instead of changing element.style.display */
+.hidden {
+  display: none;
+}
+
 /* === Global Styles === */
 body {
   font-family: Arial, sans-serif;
@@ -18,7 +24,14 @@ main {
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   width: 95%;
-  max-width: 500px;
+  max-width: 500px; /* default desktop width constraint */
+}
+
+/* Tablet-friendly adjustment: allow main card to widen on medium screens */
+@media (min-width: 600px) {
+  main {
+    max-width: 750px;
+  }
 }
 
 /* === Header === */
@@ -118,7 +131,6 @@ section h2 {
   word-break: break-word;
 }
 
-
 /* === Completed Task Style === */
 .task-list li.completed {
   background-color: #d7ffd7;
@@ -217,7 +229,6 @@ section h2 {
     font-size: 14px;
   }
   
-  /* Make outreach message content selectable and neatly styled */
   .task-text {
     font-size: 14px;
     white-space: normal;     /* allow line breaks */
@@ -270,7 +281,7 @@ section h2 {
   user-select: none;
 }
 
-/* === Celebration Pop === */
+/* === Celebration Pop Animation === */
 .celebration {
   position: fixed;
   top: 20%;
@@ -282,20 +293,12 @@ section h2 {
 }
 
 @keyframes popFade {
-  0% {
-    opacity: 0;
-    transform: scale(0.5) translateX(-50%);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2) translateX(-50%);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.8) translateX(-50%);
-  }
+  0% { opacity: 0; transform: scale(0.5) translateX(-50%); }
+  50% { opacity: 1; transform: scale(1.2) translateX(-50%); }
+  100% { opacity: 0; transform: scale(0.8) translateX(-50%); }
 }
 
+/* === Outreach-specific Styles === */
 .outreach-message {
   margin-left: 28px; /* aligns with checkbox */
   font-size: 14px;

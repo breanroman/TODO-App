@@ -1,76 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Metadata: tells browser about page interpretation -->
   <meta charset="UTF-8" />
+  <!-- Responsive meta tag so design adapts to phone, tablet, desktop -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Title displayed in browser tab -->
   <title>TODO Practice App</title>
+  
+  <!-- Link to the CSS file where visual styles live -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  
+  <!-- === Header Section === -->
   <header>
+    <!-- App Title -->
     <h1>🎯 TODO Practice App</h1>
+
+    <!-- Filter checkbox to show/hide completed tasks -->
     <label class="filter-completed-toggle">
-    <input type="checkbox" id="toggle-completed" checked />
-    Show Completed Tasks
+      <input type="checkbox" id="toggle-completed" checked />
+      Show Completed Tasks
     </label>
 
-    <!--DELETE AS ONLY FOR TESTING -->
+    <!-- DEVELOPMENT-ONLY: For testing task generation manually -->
+    <!-- Remove this <button> before final release -->
     <button id="generateTasksBtn">Force Generate Tasks</button>
-    <!--DELETE AS ONLY FOR TESTING -->
+
+    <!-- Placeholder that JS will replace with a random motivational quote -->
     <p id="motivational-quote">Loading motivational quote...</p>
   </header>
 
+  <!-- === Navigation Tabs (Single Page App Navigation) === -->
+  <!-- These buttons switch between "views" without loading a separate HTML file -->
+  <nav>
+    <!-- data-target hash tells JS which "page" to show -->
+    <button class="nav-tab active-tab" data-target="#/checklist">Checklist</button>
+    <button class="nav-tab" data-target="#/review">Weekly Review</button>
+  </nav>
+
   <main>
-    <!-- ✅ Daily Checklist Section -->
-    <section>
-      <h2>🗓️ Daily Checklist</h2>
-      <ul id="daily-tasks" class="task-list"></ul>
-    </section>
-
-    <!-- ✅ Weekly Checklist Section -->
-    <section>
-      <h2>📅 Weekly Checklist</h2>
-      <ul id="weekly-tasks" class="task-list"></ul>
-    </section>
-
-    <!-- ✅ Progress Tracker Section -->
-    <section>
-      <h2>📊 Weekly Progress</h2>
-      <p id="progress-tracker">Daily: 0/6 | Weekly: 0/3</p>
-    </section>
-
-    <!-- ✅ Completed Task History -->
-    <section>
-      <h2>✅ Completed History</h2>
-      <div>
-        <h3>Daily</h3>
-        <ul id="daily-history"></ul>
-      </div>
-      <div>
-        <h3>Weekly</h3>
-        <ul id="weekly-history"></ul>
-      </div>
-    </section>
-
-    <!-- 📝 Optional Manual Entry -->
-    <section>
-      <h2>➕ Add Custom Task</h2>
-      <input type="text" id="taskInput" placeholder="Enter a new task" />
-      <select id="taskType">
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-      </select>
-      <button id="addTaskBtn">Add Task</button>
-      </section>
-      <!-- 💾 Backup and Restore -->
+    <!-- === Page: Checklist === -->
+    <!-- We removed the inline style and will hide/show with .hidden CSS class in JS -->
+    <div id="page-checklist">
+      
+      <!-- Daily Checklist -->
       <section>
-      <h2>💾 Backup & Restore Tasks</h2>
-      <button id="backupBtn">Backup Tasks</button>
-      <input type="file" id="restoreInput" style="display:none;" />
-      <button id="restoreBtn">Restore Tasks</button>
+        <h2>🗓️ Daily Checklist</h2>
+        <ul id="daily-tasks" class="task-list"></ul>
       </section>
+
+      <!-- Weekly Checklist -->
+      <section>
+        <h2>📅 Weekly Checklist</h2>
+        <ul id="weekly-tasks" class="task-list"></ul>
+      </section>
+
+      <!-- Progress Tracker -->
+      <section>
+        <h2>📊 Weekly Progress</h2>
+        <p id="progress-tracker">Daily: 0/6 | Weekly: 0/3</p>
+      </section>
+
+      <!-- Completed Task History -->
+      <section>
+        <h2>✅ Completed History</h2>
+        <div>
+          <h3>Daily</h3>
+          <ul id="daily-history"></ul>
+        </div>
+        <div>
+          <h3>Weekly</h3>
+          <ul id="weekly-history"></ul>
+        </div>
+      </section>
+
+      <!-- Add Custom Task -->
+      <section>
+        <h2>➕ Add Custom Task</h2>
+        <input type="text" id="taskInput" placeholder="Enter a new task" />
+        <select id="taskType">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+        </select>
+        <button id="addTaskBtn">Add Task</button>
+      </section>
+
+      <!-- Backup & Restore -->
+      <section>
+        <h2>💾 Backup & Restore Tasks</h2>
+        <button id="backupBtn">Backup Tasks</button>
+        <!-- File input stays hidden, JS will click it when needed -->
+        <input type="file" id="restoreInput" class="hidden" />
+        <button id="restoreBtn">Restore Tasks</button>
+      </section>
+    </div> <!-- end #page-checklist -->
+
+    <!-- === Page: Weekly Review === -->
+    <!-- Initially hidden with .hidden class (JS will show when tab is clicked) -->
+    <div id="page-review" class="hidden">
+      <section>
+        <h2>✅ Weekly Review History</h2>
+        <div>
+          <h3>Daily</h3>
+          <ul id="review-daily-history"></ul>
+        </div>
+        <div>
+          <h3>Weekly</h3>
+          <ul id="review-weekly-history"></ul>
+        </div>
+      </section>
+    </div>
   </main>
 
+  <!-- Link to JavaScript file that controls functionality -->
   <script src="script.js"></script>
 </body>
 </html>

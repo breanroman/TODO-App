@@ -1,14 +1,19 @@
+// Run all code only after HTML content is loaded
 document.addEventListener("DOMContentLoaded", () => {
 
-  //DELETE ONLY FOR DEVELOPMENT
-document.getElementById("generateTasksBtn").addEventListener("click", () => {
-  generateDailyTasksIfNeeded();
-  generateWeeklyTasksIfNeeded();
-  resetWeeklyTasksIfNeeded();
-  location.reload();
-});
-//DELETE ONLY FOR DEVELOPMENT
+  /* -------------------------------------------
+     DEVELOPMENT ONLY: Manual task generation
+     ------------------------------------------- */
+  document.getElementById("generateTasksBtn").addEventListener("click", () => {
+    generateDailyTasksIfNeeded();
+    generateWeeklyTasksIfNeeded();
+    resetWeeklyTasksIfNeeded();
+    location.reload();
+  });
 
+  /* -------------------------------------------
+     Grab references to HTML elements
+     ------------------------------------------- */
   const taskInput = document.getElementById("taskInput");
   const taskTypeSelect = document.getElementById("taskType");
   const addTaskBtn = document.getElementById("addTaskBtn");
@@ -19,15 +24,12 @@ document.getElementById("generateTasksBtn").addEventListener("click", () => {
   const backupBtn = document.getElementById("backupBtn");
   const restoreBtn = document.getElementById("restoreBtn");
   const restoreInput = document.getElementById("restoreInput");
+  const toggleCompletedCheckbox = document.getElementById("toggle-completed");
 
-  // === Daily Outreach Messages by Date ===
-  // Format: "YYYY-MM-DD": [ "Message 1", "Message 2", ... ]
+  /* -------------------------------------------
+     DAILY OUTREACH MESSAGES HARDCODED FOR LEARNING
+     ------------------------------------------- */
   const dailyOutreachMessages = {
-    "2025-08-08": [
-      "Danielle — You make the little things feel so meaningful. Love being your partner.",
-      "Nick — Would love to catch up sometime soon. Hope the kids are doing great!",
-      "Al — You crossed my mind today. Got any random wins or good Texas stories lately?"
-    ],
     "2025-08-09": [
       "Howie — Hi friend, thinking of you today. Grateful for you in our lives.",
       "Rich, Cait, Dana, Mike, Devin, CJ — Hi Hillsman fam! Just sending warm love from Denver — hope life with little ones is bringing joy (and some sleep too!). Would love to hear how you all are doing whenever you have a moment!",
@@ -613,98 +615,106 @@ document.getElementById("generateTasksBtn").addEventListener("click", () => {
       "Danielle — Thank you for growing with me this year. I can’t wait for what’s next.",
       "Danielle’s Family Text Chain — Happy New Year’s Eve! May 2026 bring more peace and joy for all of us."
     ],
-  };
+};
 
-  // === Auto-delete old messages and alert if low ===
-  (() => {
+  /* -------------------------------------------
+     Date/Time Utilities — all in LOCAL time (MDT)
+     ------------------------------------------- */
+  function getTodayStr() {
+    return new Date().toISOString().split("T")[0];
+  }
+
+  function isAfterFiveAM() {
+    return new Date().getHours() >= 5;
+  }
+
+  function isNewDay() {
+    const lastGenerated = localStorage.getItem("lastGeneratedDate");
+    return (!lastGenerated || lastGenerated !== getTodayStr());
+  }
+
+  function isNewWeekMonday() {
     const now = new Date();
-    const todayStr = now.toISOString().split("T")[0];
-    const isAfter5AM = now.getHours() >= 5;
+    const lastWeeklyReset = localStorage.getItem("lastWeeklyResetDate");
+    const todayStr = getTodayStr();
+    // Monday = 1 in getDay()
+    return (!lastWeeklyReset || lastWeeklyReset !== todayStr) && now.getDay() === 1;
+  }
 
-    // Delete old messages
-    if (isAfter5AM) {
-      Object.keys(dailyOutreachMessages).forEach(date => {
-        if (date < todayStr) {
-          delete dailyOutreachMessages[date];
-        }
-      });
-    }
+  /* -------------------------------------------
+     Outreach message cleanup — only after 5am
+     ------------------------------------------- */
+  (function deleteOldOutreachIfNeeded() {
+    if (!isAfterFiveAM()) return; // only act after 5AM local
+    const todayStr = getTodayStr();
 
-    // Alert if 10 or fewer message days left
+    Object.keys(dailyOutreachMessages).forEach(date => {
+      if (date < todayStr) delete dailyOutreachMessages[date];
+    });
+
     const remainingDates = Object.keys(dailyOutreachMessages).filter(date => date >= todayStr);
     const lastAlert = localStorage.getItem("lastMessageAlertDate");
 
-    if (isAfter5AM && remainingDates.length <= 10 && lastAlert !== todayStr) {
-      alert(`⚠️ Only ${remainingDates.length} days of Daily Text Outreach messages left.\n\nPlease update soon.`);
+    if (remainingDates.length <= 10 && lastAlert !== todayStr) {
+      alert(`⚠️ Only ${remainingDates.length} days of Daily Text Outreach messages left.\nPlease update soon.`);
       localStorage.setItem("lastMessageAlertDate", todayStr);
     }
   })();
-  
-  const DAILY_TASKS = [
-    "Music",
-    "Art",
-    "Journaling",
-    "Self-Compassion",
-    "Exercise"
-  ];
 
-  const WEEKLY_TASKS = [
-    "Disc Golf",
-    "Time with Dani",
-    "Swim",
-    "One Beer"
-  ];
+  /* -------------------------------------------
+     Default template tasks
+     ------------------------------------------- */
+  const DAILY_TASKS = ["Music", "Art", "Journaling", "Self-Compassion", "Exercise"];
+  const WEEKLY_TASKS = ["Disc Golf", "Time with Dani", "Swim", "One Beer"];
 
+  /* -------------------------------------------
+     Initial load logic
+     ------------------------------------------- */
   generateDailyTasksIfNeeded();
-  generateWeeklyTasksIfNeeded(); 
+  generateWeeklyTasksIfNeeded();
   resetWeeklyTasksIfNeeded();
   loadTasksFromStorage();
   loadMotivationalQuote();
   updateProgressTracker();
 
-  const toggleCompletedCheckbox = document.getElementById("toggle-completed");
+  /* -------------------------------------------
+     Show/hide completed tasks using .hidden class
+     ------------------------------------------- */
   if (toggleCompletedCheckbox) {
     toggleCompletedCheckbox.addEventListener("change", () => {
       const showCompleted = toggleCompletedCheckbox.checked;
-      document.querySelectorAll("li").forEach(li => {
-        const isCompleted = li.classList.contains("completed");
-        if (isCompleted) {
-          li.style.display = showCompleted ? "" : "none";
-        }
+      document.querySelectorAll("li.completed").forEach(li => {
+        li.classList.toggle("hidden", !showCompleted);
       });
     });
   }
 
+  /* -------------------------------------------
+     Add new custom task
+     ------------------------------------------- */
   addTaskBtn.addEventListener("click", () => {
     const taskText = taskInput.value.trim();
     const taskType = taskTypeSelect.value;
-
     if (taskText === "") return;
 
-    const newTask = {
-      text: taskText,
-      type: taskType,
-      completed: false,
-      completedAt: null
-    };
-
+    const newTask = { text: taskText, type: taskType, completed: false, completedAt: null };
     saveTaskToStorage(newTask);
 
-    // Clear current task lists before reloading
+    // Clear lists then reload from storage
     dailyTaskList.innerHTML = "";
     weeklyTaskList.innerHTML = "";
-
-    // Reload tasks from storage (which will sort and add them in order)
     loadTasksFromStorage();
 
     taskInput.value = "";
   });
 
+  /* -------------------------------------------
+     Backup & Restore
+     ------------------------------------------- */
   backupBtn.addEventListener("click", () => {
     const tasks = localStorage.getItem("tasks");
     const blob = new Blob([tasks], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = url;
     a.download = "tasks-backup.json";
@@ -714,51 +724,45 @@ document.getElementById("generateTasksBtn").addEventListener("click", () => {
     URL.revokeObjectURL(url);
   });
 
-  restoreBtn.addEventListener("click", () => {
-    restoreInput.click();
-  });
+  restoreBtn.addEventListener("click", () => restoreInput.click());
 
   restoreInput.addEventListener("change", event => {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = e => {
       try {
         const tasks = JSON.parse(e.target.result);
         if (Array.isArray(tasks)) {
           localStorage.setItem("tasks", JSON.stringify(tasks));
-          location.reload(); // Refresh to re-render tasks
+          location.reload();
         } else {
           alert("Invalid backup file.");
         }
-      } catch (err) {
+      } catch {
         alert("Error reading backup file.");
       }
     };
     reader.readAsText(file);
   });
 
+  /* -------------------------------------------
+     DOM Builders
+     ------------------------------------------- */
   function addTaskToDOM(taskObj) {
     const li = document.createElement("li");
-
-    // Wrapper for checkbox, text, delete button
     const wrapper = document.createElement("div");
     wrapper.classList.add("task-wrapper");
 
-    // Checkbox
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = taskObj.completed;
 
-    // Task Text
-    // Split the task into title + optional message
     const [titleLine, ...messageLines] = taskObj.text.split("<br>");
     const titleSpan = document.createElement("span");
     titleSpan.innerHTML = titleLine;
     titleSpan.classList.add("task-text");
 
-    // Optional: If there's outreach message below title
     if (messageLines.length > 0) {
       const messageDiv = document.createElement("div");
       messageDiv.classList.add("outreach-message");
@@ -769,17 +773,13 @@ document.getElementById("generateTasksBtn").addEventListener("click", () => {
       wrapper.appendChild(titleSpan);
     }
 
-    // Add checkbox first
     wrapper.insertBefore(checkbox, wrapper.firstChild);
 
-    //  Highlight to the outreach message for the current day
     if (taskObj.text.startsWith("Daily Text Outreaches:")) {
       li.classList.add("highlight-outreach");
     }
 
-    // Delete Button for custom tasks
     if (taskObj.type === "custom") {
-      // Delete button
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "Delete";
       deleteBtn.classList.add("delete-btn");
@@ -790,22 +790,17 @@ document.getElementById("generateTasksBtn").addEventListener("click", () => {
         renderCompletedHistory();
       });
 
-      // Edit button
       const editBtn = document.createElement("button");
       editBtn.textContent = "Edit";
       editBtn.classList.add("edit-btn");
-      editBtn.addEventListener("click", () => {
-        startEditingTask(span, taskObj);
-      });
+      editBtn.addEventListener("click", () => startEditingTask(titleSpan, taskObj));
 
       wrapper.appendChild(editBtn);
       wrapper.appendChild(deleteBtn);
     }
 
-
     li.appendChild(wrapper);
 
-    // Timestamp
     const timestamp = document.createElement("div");
     timestamp.classList.add("task-timestamp");
 
@@ -814,24 +809,14 @@ document.getElementById("generateTasksBtn").addEventListener("click", () => {
         li.classList.add("completed");
         if (taskObj.completedAt) {
           const dt = new Date(taskObj.completedAt);
-          timestamp.textContent = `✅ Completed at ${dt.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit"
-          })}`;
-        } else {
-          timestamp.textContent = "✅ Completed";
+          timestamp.textContent = `✅ Completed at ${dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
         }
       } else {
         li.classList.remove("completed");
         timestamp.textContent = "";
       }
-
-            const showCompleted = document.getElementById("toggle-completed")?.checked;
-      if (!showCompleted && taskObj.completed) {
-        li.style.display = "none";
-      } else {
-        li.style.display = "";
-      }
+      const showCompleted = toggleCompletedCheckbox?.checked;
+      li.classList.toggle("hidden", taskObj.completed && !showCompleted);
     }
 
     updateTaskStyle();
@@ -847,23 +832,15 @@ document.getElementById("generateTasksBtn").addEventListener("click", () => {
 
     li.appendChild(timestamp);
 
-        // Apply filtering based on toggle
-    const showCompleted = document.getElementById("toggle-completed")?.checked;
-    if (!showCompleted && taskObj.completed) {
-       li.style.display = "none";
-     }
-
-    // Append to correct list
-    if (taskObj.type === "daily") {
-      dailyTaskList.appendChild(li);
-    } else if (taskObj.type === "weekly") {
-      weeklyTaskList.appendChild(li);
-    }
+    if (taskObj.type === "daily") dailyTaskList.appendChild(li);
+    else if (taskObj.type === "weekly") weeklyTaskList.appendChild(li);
   }
 
+  /* -------------------------------------------
+     Progress Tracker
+     ------------------------------------------- */
   function updateProgressTracker() {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
     const dailyTasks = tasks.filter(t => t.type === "daily");
     const weeklyTasks = tasks.filter(t => t.type === "weekly");
 
@@ -873,11 +850,14 @@ document.getElementById("generateTasksBtn").addEventListener("click", () => {
     const dailyTotal = dailyTasks.length;
     const weeklyTotal = weeklyTasks.length;
 
-    const progressText = `Daily: ${dailyCompleted}/${dailyTotal} | Weekly: ${weeklyCompleted}/${weeklyTotal}`;
-    document.getElementById("progress-tracker").textContent = progressText;
+    document.getElementById("progress-tracker").textContent =
+      `Daily: ${dailyCompleted}/${dailyTotal} | Weekly: ${weeklyCompleted}/${weeklyTotal}`;
     checkForDailyCompletionCelebration();
   }
 
+  /* -------------------------------------------
+     Storage Helpers
+     ------------------------------------------- */
   function saveTaskToStorage(task) {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
     tasks.push(task);
@@ -886,56 +866,17 @@ document.getElementById("generateTasksBtn").addEventListener("click", () => {
 
   function loadTasksFromStorage() {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
-  // Sort tasks: incomplete first, then completed by completedAt descending
-  tasks.sort((a, b) => {
+    // Sort: incomplete first, completed sorted by completion time
+    tasks.sort((a, b) => {
       if (a.completed === b.completed) {
-        if (!a.completed) return 0; // both incomplete - keep original order
-        // Both completed, sort by completedAt descending
+        if (!a.completed) return 0;
         return new Date(b.completedAt) - new Date(a.completedAt);
       }
-      return a.completed ? 1 : -1; // incomplete first
+      return a.completed ? 1 : -1;
     });
-
     tasks.forEach(addTaskToDOM);
     renderCompletedHistory();
   }
-
-
-  function loadMotivationalQuote() {
-    const quoteDisplay = document.getElementById("motivational-quote");
-
-    const cachedQuote = localStorage.getItem("quoteText");
-    const cachedAuthor = localStorage.getItem("quoteAuthor");
-
-    if (!hasNewQuoteDayStarted() && cachedQuote) {
-      quoteDisplay.textContent = `"${cachedQuote}" — ${cachedAuthor || "Unknown"}`;
-      return;
-    }
-
-    fetch("https://api.quotable.io/random")
-      .then(response => response.json())
-      .then(data => {
-        const quote = data.content;
-        const author = data.author;
-
-        quoteDisplay.textContent = `"${quote}" — ${author}`;
-
-        localStorage.setItem("quoteText", quote);
-        localStorage.setItem("quoteAuthor", author);
-        const todayStr = new Date().toISOString().split("T")[0];
-        localStorage.setItem("lastQuoteDate", todayStr);
-      })
-      .catch(err => {
-        console.error("Quote fetch error:", err);
-        if (cachedQuote) {
-          quoteDisplay.textContent = `"${cachedQuote}" — ${cachedAuthor || "Unknown"}`;
-        } else {
-          quoteDisplay.textContent = "You're doing great. Keep going! 💪";
-        }
-      });
-  }
-
 
   function removeTaskFromStorage(taskToDelete) {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
@@ -952,154 +893,83 @@ document.getElementById("generateTasksBtn").addEventListener("click", () => {
     }
   }
 
-  function hasNewDayStarted() {
-    const now = new Date();
-    const lastGenerated = localStorage.getItem("lastGeneratedDate");
-    const todayStr = now.toISOString().split("T")[0];
-    const isAfter5AM = now.getHours() >= 5;
-    return (!lastGenerated || lastGenerated !== todayStr) && isAfter5AM;
-  }
-
-  function hasNewWeekStarted() {
-    const now = new Date();
-    const lastReset = localStorage.getItem("lastWeeklyResetDate");
-    const todayStr = now.toISOString().split("T")[0];
-
-    const isMonday = now.getDay() === 1;
-    const isAfter5AM = now.getHours() >= 5;
-
-    return (!lastReset || lastReset !== todayStr) && isMonday && isAfter5AM;
-  }
-
-// <-- Insert here -->
-
-function hasNewQuoteDayStarted() {
-  const now = new Date();
-  const lastQuoteDate = localStorage.getItem("lastQuoteDate");
-  const todayStr = now.toISOString().split("T")[0];
-  const isAfter5AM = now.getHours() >= 5;
-
-  return (!lastQuoteDate || lastQuoteDate !== todayStr) && isAfter5AM;
-}
-
+  /* -------------------------------------------
+     Generation / Reset Functions with 5AM MDT rule
+     ------------------------------------------- */
   function resetWeeklyTasksIfNeeded() {
-    if (hasNewWeekStarted()) {
+    if (isNewWeekMonday() && isAfterFiveAM()) {
       const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
-      const updated = tasks.map(task => {
-        if (task.type === "weekly") {
-          return {
-            ...task,
-            completed: false,
-            completedAt: null
-          };
-        }
-        return task;
-      });
-
+      const updated = tasks.map(task => task.type === "weekly"
+        ? { ...task, completed: false, completedAt: null }
+        : task
+      );
       localStorage.setItem("tasks", JSON.stringify(updated));
-      const todayStr = new Date().toISOString().split("T")[0];
-      localStorage.setItem("lastWeeklyResetDate", todayStr);
+      localStorage.setItem("lastWeeklyResetDate", getTodayStr());
     }
   }
 
   function generateDailyTasksIfNeeded() {
-    if (hasNewDayStarted()) {
+    if (isNewDay() && isAfterFiveAM()) {
       const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
-      // Core daily tasks (excluding outreach)
-      DAILY_TASKS.filter(t => t !== "Daily Text Outreaches").forEach(taskText => {
+      DAILY_TASKS.forEach(taskText => {
         if (!tasks.some(t => t.text === taskText && t.type === "daily")) {
-          tasks.push({
-            text: taskText,
-            type: "daily",
-            completed: false,
-            completedAt: null
-          });
+          tasks.push({ text: taskText, type: "daily", completed: false, completedAt: null });
         }
       });
 
-      //  Add outreach task (only one entry, with all messages for today)
-      const todayStr = new Date().toISOString().split("T")[0];
-      const messages = dailyOutreachMessages[todayStr];
-        if (messages && messages.length > 0) {
-          const outreachTaskText = "Daily Text Outreaches:<br>" +
-            messages.map(msg => `• ${typeof msg === "string" ? msg : JSON.stringify(msg)}`).join("<br>");
-
-          tasks.push({
-            text: outreachTaskText,
-            type: "daily",
-            completed: false,
-            completedAt: null
+      // Add outreach messages if present for today
+      const messages = dailyOutreachMessages[getTodayStr()];
+      if (messages?.length > 0) {
+        tasks.push({
+          text: "Daily Text Outreaches:<br>" + messages.map(msg => `• ${msg}`).join("<br>"),
+          type: "daily",
+          completed: false,
+          completedAt: null
         });
-        } else {
-          // fallback if no messages for today
-          const fallbackText = "Daily Text Outreaches";
-          if (!tasks.some(t => t.text === fallbackText && t.type === "daily")) {
-            tasks.push({
-              text: fallbackText,
-              type: "daily",
-              completed: false,
-              completedAt: null
-            });
-          }
-        }
-
-        localStorage.setItem("tasks", JSON.stringify(tasks));
-        localStorage.setItem("lastGeneratedDate", todayStr);
-     }
-  }
-
-
-  function generateWeeklyTasksIfNeeded() {
-    if (hasNewWeekStarted()) {
-      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
-      WEEKLY_TASKS.forEach(taskText => {
-        if (!tasks.some(t => t.text === taskText && t.type === "weekly")) {
-          tasks.push({
-            text: taskText,
-            type: "weekly",
-            completed: false,
-            completedAt: null
-          });
-        }
-      });
+      }
 
       localStorage.setItem("tasks", JSON.stringify(tasks));
-      const todayStr = new Date().toISOString().split("T")[0];
-      localStorage.setItem("lastWeeklyGeneratedDate", todayStr);
+      localStorage.setItem("lastGeneratedDate", getTodayStr());
     }
   }
 
+  function generateWeeklyTasksIfNeeded() {
+    if (isNewWeekMonday() && isAfterFiveAM()) {
+      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      WEEKLY_TASKS.forEach(taskText => {
+        if (!tasks.some(t => t.text === taskText && t.type === "weekly")) {
+          tasks.push({ text: taskText, type: "weekly", completed: false, completedAt: null });
+        }
+      });
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      localStorage.setItem("lastWeeklyGeneratedDate", getTodayStr());
+    }
+  }
 
+  /* -------------------------------------------
+     History Rendering
+     ------------------------------------------- */
   function renderCompletedHistory() {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
     dailyHistoryList.innerHTML = "";
     weeklyHistoryList.innerHTML = "";
-
-    const dailyCompleted = tasks.filter(t => t.type === "daily" && t.completed);
-    const weeklyCompleted = tasks.filter(t => t.type === "weekly" && t.completed);
-
-    dailyCompleted.forEach(task => {
+    tasks.filter(t => t.type === "daily" && t.completed).forEach(task => {
       const li = document.createElement("li");
-      const dt = new Date(task.completedAt);
-      li.textContent = `${task.text} (Completed at ${dt.toLocaleString()})`;
+      li.textContent = `${task.text} (Completed at ${new Date(task.completedAt).toLocaleString()})`;
       dailyHistoryList.appendChild(li);
     });
-
-    weeklyCompleted.forEach(task => {
+    tasks.filter(t => t.type === "weekly" && t.completed).forEach(task => {
       const li = document.createElement("li");
-      const dt = new Date(task.completedAt);
-      li.textContent = `${task.text} (Completed at ${dt.toLocaleString()})`;
+      li.textContent = `${task.text} (Completed at ${new Date(task.completedAt).toLocaleString()})`;
       weeklyHistoryList.appendChild(li);
     });
   }
 
-    function startEditingTask(span, taskObj) {
+  /* -------------------------------------------
+     Task Editing
+     ------------------------------------------- */
+  function startEditingTask(span, taskObj) {
     const originalText = span.textContent;
-
     const input = document.createElement("input");
     input.type = "text";
     input.value = originalText;
@@ -1109,11 +979,7 @@ function hasNewQuoteDayStarted() {
     input.focus();
 
     input.addEventListener("blur", finishEdit);
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        finishEdit();
-      }
-    });
+    input.addEventListener("keydown", e => { if (e.key === "Enter") finishEdit(); });
 
     function finishEdit() {
       const newText = input.value.trim();
@@ -1121,37 +987,60 @@ function hasNewQuoteDayStarted() {
         taskObj.text = newText;
         updateTaskInStorage(taskObj);
       }
-
       span.textContent = taskObj.text;
       input.replaceWith(span);
     }
   }
 
+  /* -------------------------------------------
+     Celebration when all daily tasks complete
+     ------------------------------------------- */
   function checkForDailyCompletionCelebration() {
-      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-      const dailyTasks = tasks.filter(t => t.type === "daily");
-      const allCompleted = dailyTasks.length > 0 && dailyTasks.every(t => t.completed);
-
-      const today = new Date().toISOString().split("T")[0];
-      const lastCelebrated = localStorage.getItem("dailyCelebrationShown");
-
-      if (allCompleted && lastCelebrated !== today) {
-        showCelebration();
-        localStorage.setItem("dailyCelebrationShown", today);
-      }
+    const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    const dailyTasks = tasks.filter(t => t.type === "daily");
+    const allCompleted = dailyTasks.length > 0 && dailyTasks.every(t => t.completed);
+    const today = getTodayStr();
+    if (allCompleted && localStorage.getItem("dailyCelebrationShown") !== today) {
+      showCelebration();
+      localStorage.setItem("dailyCelebrationShown", today);
+    }
   }
 
-    function showCelebration() {
-      // Simple celebration with alert and emojis (can be replaced with animation)
-      alert("🎉 Congrats! You completed all your daily tasks!");
-  
-      // Optional: show some fun DOM effect
-      const confetti = document.createElement("div");
-      confetti.innerHTML = "🎊🎈🎉";
-      confetti.classList.add("celebration");
-      document.body.appendChild(confetti);
+  function showCelebration() {
+    alert("🎉 Congrats! You completed all your daily tasks!");
+    const confetti = document.createElement("div");
+    confetti.innerHTML = "🎊🎈🎉";
+    confetti.classList.add("celebration");
+    document.body.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3000);
+  }
 
-      setTimeout(() => confetti.remove(), 3000); // remove after 3 seconds
+  /* -------------------------------------------
+     SPA Routing — now uses .hidden instead of style
+     ------------------------------------------- */
+  const pageChecklist = document.getElementById("page-checklist");
+  const pageReview = document.getElementById("page-review");
+  const navTabs = document.querySelectorAll(".nav-tab");
+
+  function handleRouteChange() {
+    const hash = window.location.hash || "#/checklist";
+    if (hash === "#/review") {
+      pageChecklist.classList.add("hidden");
+      pageReview.classList.remove("hidden");
+      navTabs.forEach(tab => tab.classList.toggle("active-tab", tab.dataset.target === "#/review"));
+    } else {
+      pageChecklist.classList.remove("hidden");
+      pageReview.classList.add("hidden");
+      navTabs.forEach(tab => tab.classList.toggle("active-tab", tab.dataset.target === "#/checklist"));
     }
+  }
 
-});
+  navTabs.forEach(tab => {
+    tab.addEventListener("click", () => location.hash = tab.dataset.target);
+  });
+
+  window.addEventListener("hashchange", handleRouteChange);
+  handleRouteChange(); // initial load
+
+  /* ------------------------------------------- */
+}); // end DOMContentLoaded

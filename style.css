@@ -1,313 +1,137 @@
-/* === Utility Class for Show/Hide === */
-/* JS will toggle this class instead of changing element.style.display */
+/* style.css */
+
+/* Hide elements with .hidden */
 .hidden {
-  display: none;
+  display: none !important;
 }
 
-/* === Global Styles === */
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-}
-
-/* === Main Container === */
-main {
-  background-color: #fff;
-  padding: 20px;
-  margin: 60px 0;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  width: 95%;
-  max-width: 500px; /* default desktop width constraint */
-}
-
-/* Tablet-friendly adjustment: allow main card to widen on medium screens */
-@media (min-width: 600px) {
-  main {
-    max-width: 750px;
-  }
-}
-
-/* === Header === */
-h1 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-#motivational-quote {
-  text-align: center;
-  font-style: italic;
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 20px;
-}
-
-/* === Section Styling === */
-section {
-  margin-bottom: 30px;
-}
-
-section h2 {
-  font-size: 18px;
-  margin-bottom: 10px;
-  color: #444;
-}
-
-/* === Input + Button === */
-#taskInput,
-#taskType {
-  width: 100%;
-  padding: 10px;
-  font-size: 15px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-#addTaskBtn {
-  width: 100%;
-  padding: 10px;
-  font-size: 15px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
+/* Navigation tabs styling */
+.nav-tab {
   cursor: pointer;
-  transition: background 0.3s ease;
+  padding: 0.5em 1em;
+  background-color: #eee;
+  border: none;
+  outline: none;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+  margin-right: 0.25em;
+  border-radius: 4px;
 }
 
-#addTaskBtn:hover {
-  background-color: #45a049;
+.nav-tab:hover {
+  background-color: #ddd;
 }
 
-/* === Task List Styling === */
+.active-tab {
+  background-color: #4285f4;
+  color: white;
+  font-weight: bold;
+}
+
+/* Task lists */
 .task-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  list-style-type: none;
+  padding-left: 0;
+  max-width: 600px;
+  margin: 0 auto 1em;
 }
 
-.task-list li {
-  background-color: #eef;
-  margin-bottom: 8px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 90%;
-  margin-left: auto;
-  margin-right: auto;
-  flex-wrap: wrap;
-}
-
-/* === Task Wrapper === */
+/* Task item styling */
 .task-wrapper {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  flex-grow: 1;
-  min-width: 0;
-}
-
-.task-wrapper input[type="checkbox"] {
-  transform: scale(1.3);
-  cursor: pointer;
-  margin-right: 5px;
+  gap: 0.75em;
+  padding: 0.4em 0.6em;
+  border-bottom: 1px solid #ccc;
 }
 
 .task-text {
-  font-size: 15px;
   flex-grow: 1;
-  word-break: break-word;
 }
 
-/* === Completed Task Style === */
-.task-list li.completed {
-  background-color: #d7ffd7;
+/* Completed task style */
+.completed .task-text {
   text-decoration: line-through;
-  color: #333;
+  color: gray;
 }
 
-/* === Timestamps === */
+/* Task timestamp */
 .task-timestamp {
-  font-size: 13px;
-  color: #555;
-  margin-top: 4px;
-  padding-left: 28px;
+  font-size: 0.8rem;
+  color: #666;
 }
 
-/* === Delete Button === */
-.delete-btn {
-  margin-left: 10px;
-  padding: 4px 8px;
-  font-size: 13px;
-  background-color: #e74c3c;
-  color: white;
+/* Highlight outreach messages */
+.highlight-outreach {
+  background-color: #fff8dc;
+  border-left: 4px solid #ffa500;
+  padding-left: 0.5em;
+}
+
+/* Edit & Delete buttons */
+.edit-btn, .delete-btn {
+  background-color: #f0f0f0;
   border: none;
-  border-radius: 4px;
+  border-radius: 3px;
+  padding: 0.25em 0.5em;
   cursor: pointer;
+}
+
+.edit-btn:hover {
+  background-color: #d0e8ff;
 }
 
 .delete-btn:hover {
-  background-color: #c0392b;
+  background-color: #ffdddd;
 }
 
-/* === Progress Tracker === */
-#progress-tracker {
-  font-weight: bold;
-  text-align: center;
-  font-size: 16px;
-  margin-top: 10px;
-  color: #2b2b2b;
-}
-
-/* === History Section === */
-#daily-history,
-#weekly-history {
-  list-style: none;
-  padding-left: 0;
-  font-size: 14px;
-  margin: 0;
-}
-
-#daily-history li,
-#weekly-history li {
-  background-color: #f0f0f0;
-  padding: 6px;
-  margin-bottom: 6px;
-  border-left: 4px solid #2196f3;
-  border-radius: 4px;
-  font-size: 13px;
-}
-
-/* === Responsive Mobile Design === */
-@media (max-width: 400px) {
-  main {
-    margin-top: 20px;
-    padding: 12px;
-  }
-
-  h1 {
-    font-size: 20px;
-  }
-
-  section h2 {
-    font-size: 15px;
-  }
-
-  #motivational-quote {
-    font-size: 12px;
-    margin: 10px 0;
-  }
-
-  .filter-completed-toggle {
-    font-size: 0.9rem;
-    display: block;
-    margin-top: 10px;
-    margin-bottom: 15px;
-  }
-
-  #addTaskBtn,
-  #taskInput,
-  #taskType {
-    font-size: 14px;
-    padding: 8px;
-  }
-
-  .task-list li {
-    padding: 6px 8px;
-    font-size: 14px;
-  }
-  
-  .task-text {
-    font-size: 14px;
-    white-space: normal;     /* allow line breaks */
-    user-select: text;       /* allow copying */
-    cursor: text;
-  }
-
-  .task-wrapper {
-    gap: 5px;
-  }
-
-  .delete-btn {
-    margin: 5px 0 0 0;
-    padding: 4px 6px;
-  }
-
-  .edit-btn {
-    margin-top: 5px;
-  }
-
-  .celebration {
-    font-size: 2.2rem;
-    top: 25%;
-  }
-}
-
-/* === Edit Button + Input === */
-.edit-btn {
-  background-color: #f0ad4e;
-  border: none;
-  color: white;
-  padding: 4px 8px;
-  margin-left: 5px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.edit-input {
-  padding: 4px;
-  font-size: 1rem;
-  border: 1px solid #aaa;
-  border-radius: 4px;
-}
-
-/* === Toggle for Completed Tasks === */
-.filter-completed-toggle {
-  display: block;
-  margin: 10px 0 20px 0;
-  font-size: 1rem;
-  user-select: none;
-}
-
-/* === Celebration Pop Animation === */
+/* Confetti celebration */
 .celebration {
   position: fixed;
   top: 20%;
   left: 50%;
   transform: translateX(-50%);
   font-size: 3rem;
-  z-index: 1000;
-  animation: popFade 3s ease-out forwards;
+  pointer-events: none;
+  opacity: 0.9;
+  user-select: none;
+  z-index: 9999;
 }
 
-@keyframes popFade {
-  0% { opacity: 0; transform: scale(0.5) translateX(-50%); }
-  50% { opacity: 1; transform: scale(1.2) translateX(-50%); }
-  100% { opacity: 0; transform: scale(0.8) translateX(-50%); }
+/* Filter toggle label */
+.filter-completed-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 1rem;
+  margin-bottom: 1em;
 }
 
-/* === Outreach-specific Styles === */
-.outreach-message {
-  margin-left: 28px; /* aligns with checkbox */
-  font-size: 14px;
-  white-space: pre-line;
-  margin-top: 4px;
+/* Input styling */
+input[type="text"], select {
+  padding: 0.4em;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  max-width: 300px;
 }
 
-.highlight-outreach {
-  background-color: #e0fbff !important;
-  border-left: 4px solid #ffcc00;
-  box-shadow: 0 0 4px rgba(255, 204, 0, 0.3);
+button {
+  font-size: 1rem;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  background-color: #4285f4;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #306ac9;
+}
+
+/* Utility hidden class for inputs */
+.hidden {
+  display: none !important;
 }
